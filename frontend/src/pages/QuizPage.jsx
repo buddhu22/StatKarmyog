@@ -15,6 +15,8 @@ import {
   Space,
   Tag,
   Alert,
+  Modal,
+  Tooltip,
   Upload,
   Result,
   message,
@@ -34,6 +36,7 @@ import {
   DatabaseOutlined,
   RobotOutlined,
   TagsOutlined,
+  LogoutOutlined,
 } from '@ant-design/icons';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
@@ -212,6 +215,29 @@ export default function QuizPage() {
       clearTimeout(stepTimer3);
       clearTimeout(stepTimer4);
     }
+  };
+
+  const discardQuiz = () => {
+    setStage('generator');
+    setCurrentQIndex(0);
+    setUserAnswers({});
+    setAttemptId(null);
+    setQuestions([]);
+    setSubmitResult(null);
+    setFileList([]);
+    message.info('Quiz discarded. You are back at the Generate Quiz section.');
+  };
+
+  const confirmExitQuiz = () => {
+    Modal.confirm({
+      title: 'Exit this quiz?',
+      content: 'Are you sure you want to exit from the exam? Your answers and progress will be discarded.',
+      okText: 'Discard quiz',
+      cancelText: 'Continue quiz',
+      okButtonProps: { danger: true },
+      centered: true,
+      onOk: discardQuiz,
+    });
   };
 
   const handleOptionSelect = (qId, optionKey) => {
@@ -530,16 +556,31 @@ export default function QuizPage() {
       {/* Stage 3: MCQ QUIZ INTERFACE */}
       {stage === 'quiz' && (
         <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2">
+          <div className="flex flex-col gap-3 pb-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <span className="text-xs font-semibold text-[#2966A3] uppercase tracking-wider">Assessment in Progress</span>
               <Title level={4} style={{ margin: 0, color: '#0B2641' }}>
                 {selectedCompetency}
               </Title>
             </div>
-            <Tag style={{ backgroundColor: '#D1E0EE', color: '#0B2641', borderColor: '#B3CDE0', borderRadius: 999, padding: '4px 12px', fontWeight: 600 }}>
-              Question {currentQIndex + 1} of {questions.length}
-            </Tag>
+            <div className="flex items-center justify-between gap-2 sm:justify-end">
+              <Tag style={{ backgroundColor: '#D1E0EE', color: '#0B2641', borderColor: '#B3CDE0', borderRadius: 999, padding: '4px 12px', fontWeight: 600 }}>
+                Question {currentQIndex + 1} of {questions.length}
+              </Tag>
+              <Tooltip title="Exit quiz">
+                <Button
+                  danger
+                  type="default"
+                  size="small"
+                  icon={<LogoutOutlined />}
+                  onClick={confirmExitQuiz}
+                  aria-label="Exit quiz"
+                  className="!shrink-0 sm:!h-9 sm:!px-3"
+                >
+                  <span className="hidden sm:inline">Exit quiz</span>
+                </Button>
+              </Tooltip>
+            </div>
           </div>
 
           <Progress percent={((currentQIndex + 1) / questions.length) * 100} strokeColor="#2966A3" showInfo={false} />
