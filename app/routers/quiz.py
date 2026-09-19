@@ -14,6 +14,7 @@ POST /api/quiz/submit
 
 import datetime
 import logging
+import os
 import uuid
 from collections import defaultdict
 
@@ -151,19 +152,31 @@ async def generate_quiz(
             logger.info("[PDF] filename=%s size=%d", filename, len(content))
             raw_text = await extract_text(file)
             logger.info("[EXTRACTION] filename=%s characters_extracted=%d", filename, len(raw_text))
-            rag_result = retrieve_relevant_context(
-                raw_text,
-                source=filename,
-                target_competency=target_competency,
-            )
-            text = rag_result["context"]
-            logger.info(
-                "[RAG] filename=%s chunks_created=%d retrieved_chunks=%d context_length=%d",
-                filename,
-                rag_result["chunk_count"],
-                rag_result["retrieved_chunk_count"],
-                len(text),
-            )
+            semantic_enabled = os.environ.get("ENABLE_SEMANTIC_SEARCH", "true").strip().lower() in {
+                "1", "true", "yes", "on"
+            }
+            if semantic_enabled:
+                rag_result = retrieve_relevant_context(
+                    raw_text,
+                    source=filename,
+                    target_competency=target_competency,
+                )
+                text = rag_result["context"]
+                logger.info(
+                    "[RAG] filename=%s chunks_created=%d retrieved_chunks=%d context_length=%d",
+                    filename,
+                    rag_result["chunk_count"],
+                    rag_result["retrieved_chunk_count"],
+                    len(text),
+                )
+            else:
+                text = raw_text
+                logger.info(
+                    "[RAG] disabled for deployment; sending extracted text directly to LLM "
+                    "filename=%s context_length=%d",
+                    filename,
+                    len(text),
+                )
         except ValueError as exc:
             logger.warning("[RAG] filename=%s status=failed error=%s", filename, exc)
             raise HTTPException(status_code=422, detail=str(exc))

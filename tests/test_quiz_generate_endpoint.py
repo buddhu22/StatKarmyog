@@ -305,6 +305,30 @@ def test_generate_quiz_pdf_uses_document_rag_and_persists(client):
         db.close()
 
 
+def test_generate_quiz_pdf_deployment_mode_sends_extracted_text_to_llm(client):
+    """Render mode skips optional embeddings but still sends PDF text to Gemini."""
+    pdf_content = (FIXTURES_DIR / "test_sampling_manual.pdf").read_bytes()
+
+    with patch.dict("os.environ", {"ENABLE_SEMANTIC_SEARCH": "false", "GOOGLE_API_KEY": "configured"}):
+        with patch("app.routers.quiz.generate_mcqs", side_effect=_mock_generate_mcqs) as gen:
+            with patch("app.services.document_rag.retrieve_relevant_context") as rag:
+                resp = client.post(
+                    "/api/quiz/generate",
+                    files={"file": ("test_sampling_manual.pdf", pdf_content, "application/pdf")},
+                    data={
+                        "officer_id": "OFF001",
+                        "difficulty": "medium",
+                        "language": "en",
+                        "num_questions": "3",
+                        "target_competency": "Sampling",
+                    },
+                )
+
+    assert resp.status_code == 200
+    rag.assert_not_called()
+    assert "Sampling Design" in gen.call_args.kwargs["text"]
+
+
 def test_generate_quiz_short_text_pdf_reaches_rag(client):
     """A valid text PDF below the generic text threshold should still use PDF RAG."""
     pdf_content = (FIXTURES_DIR / "sample_sampling_guidelines.pdf").read_bytes()

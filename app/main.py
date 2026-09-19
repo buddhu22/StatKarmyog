@@ -38,8 +38,12 @@ def _get_allowed_origins() -> list[str]:
         "https://statkarmyog.vercel.app",  # Production frontend
     ]
     configured = os.environ.get("CORS_ALLOWED_ORIGINS", "")
-    origins.extend(origin.strip() for origin in configured.split(",") if origin.strip())
-    return origins
+    origins.extend(
+        origin.strip().rstrip("/")
+        for origin in configured.split(",")
+        if origin.strip()
+    )
+    return list(dict.fromkeys(origins))
 
 
 def _semantic_search_enabled() -> bool:
@@ -95,6 +99,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_get_allowed_origins(),
+    allow_origin_regex=r"https://[a-zA-Z0-9-]+\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
