@@ -71,13 +71,17 @@ Output Directory: dist
 Environment variable:
 
 ```txt
-VITE_API_BASE_URL=https://your-render-backend.onrender.com
+VITE_API_BASE_URL=https://statkarmyog-1.onrender.com
 ```
+
+Set this variable in Vercel before building the frontend. The client also uses
+this Render URL as its production fallback, while local development continues
+to use `http://localhost:8000`.
 
 After Vercel deploys, copy the Vercel URL and update Render's backend environment variable:
 
 ```txt
-CORS_ALLOWED_ORIGINS=https://your-vercel-app.vercel.app
+CORS_ALLOWED_ORIGINS=https://statkarmyog.vercel.app
 ```
 
 Then redeploy the Render backend.
