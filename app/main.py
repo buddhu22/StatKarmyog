@@ -35,6 +35,7 @@ def _get_allowed_origins() -> list[str]:
     origins = [
         "http://localhost:5173",  # Vite dev server
         "http://localhost:3000",  # React dev server
+        "https://statkarmyog.vercel.app",  # Production frontend
     ]
     configured = os.environ.get("CORS_ALLOWED_ORIGINS", "")
     origins.extend(origin.strip() for origin in configured.split(",") if origin.strip())

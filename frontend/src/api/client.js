@@ -473,21 +473,44 @@ export async function uploadArtifact(formData) {
  * @returns {Promise<{data: object|null, isMock: boolean, error?: boolean, message?: string}>}
  */
 export async function generateQuizApi(formData) {
-  try {
-    const res = await api.post('/api/quiz/generate', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-      timeout: 120000, // 120s — LLM generation is slow
-    });
-    return { data: res.data, isMock: false };
-  } catch (err) {
-    console.error('[API] Quiz generation failed:', err);
-    return {
-      data: null,
-      isMock: false,
-      error: true,
-      message: extractErrorMessage(err),
-    };
+  const retryDelays = [0, 20000, 40000];
+  let lastError;
+
+  for (let attempt = 0; attempt < retryDelays.length; attempt += 1) {
+    if (retryDelays[attempt] > 0) {
+      await new Promise((resolve) => setTimeout(resolve, retryDelays[attempt]));
+    }
+
+    try {
+      const res = await api.post('/api/quiz/generate', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 120000, // 120s — LLM generation is slow
+      });
+      return { data: res.data, isMock: false };
+    } catch (err) {
+      lastError = err;
+      if (err.response?.data?.code === 'LLM_NOT_CONFIGURED') break;
+      const status = err.response?.status;
+      const isTransient = !status || [502, 503, 504].includes(status);
+      if (!isTransient || attempt === retryDelays.length - 1) break;
+      console.warn(`[API] Quiz service unavailable; retrying (${attempt + 1}/2).`);
+    }
   }
+
+  console.error('[API] Quiz generation failed:', lastError);
+  const lastStatus = lastError?.response?.status;
+  const configurationError = lastError?.response?.data?.code === 'LLM_NOT_CONFIGURED';
+  return {
+    data: null,
+    isMock: false,
+    error: true,
+    message:
+      configurationError
+        ? 'Quiz generation is not configured. Add GOOGLE_API_KEY to the backend environment and restart the server.'
+        : !lastStatus || [502, 503, 504].includes(lastStatus)
+        ? 'The Render quiz service is waking up or temporarily unavailable. Please wait up to a minute and try again.'
+        : extractErrorMessage(lastError),
+  };
 }
 
 /**

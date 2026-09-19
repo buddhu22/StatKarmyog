@@ -358,3 +358,31 @@ def test_generate_quiz_pdf_returns_specific_rag_error(client):
     assert resp.status_code == 422
     assert "No relevant context retrieved" in resp.json()["detail"]
 
+
+def test_generate_quiz_requires_llm_configuration(client):
+    """A PDF must not be presented as an AI quiz when Gemini is unconfigured."""
+    pdf_content = (FIXTURES_DIR / "test_sampling_manual.pdf").read_bytes()
+    rag_context = {
+        "context": "Extracted PDF context ready for the LLM.",
+        "chunk_count": 1,
+        "retrieved_chunk_count": 1,
+    }
+
+    with patch.dict("os.environ", {}, clear=True):
+        with patch("app.services.document_rag.retrieve_relevant_context", return_value=rag_context):
+            resp = client.post(
+                "/api/quiz/generate",
+                files={"file": ("test_sampling_manual.pdf", pdf_content, "application/pdf")},
+                data={
+                    "officer_id": "OFF001",
+                    "difficulty": "medium",
+                    "language": "en",
+                    "num_questions": "3",
+                    "target_competency": "Sampling",
+                },
+            )
+
+    assert resp.status_code == 503
+    assert resp.json()["code"] == "LLM_NOT_CONFIGURED"
+    assert "GOOGLE_API_KEY" in resp.json()["error"]
+

@@ -305,8 +305,11 @@ def generate_mcqs(
                     },
                     timeout=90,
                 )
-            except requests.exceptions.Timeout:
-                last_err_msg = f"Gemini model '{model_name}' timed out on attempt {retry + 1}."
+            except requests.exceptions.RequestException as exc:
+                last_err_msg = (
+                    f"Gemini model '{model_name}' request failed on attempt "
+                    f"{retry + 1}: {exc}"
+                )
                 logger.warning(last_err_msg)
                 time.sleep(2 ** retry)  # 1s, 2s
                 continue

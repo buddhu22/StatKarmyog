@@ -16,6 +16,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Card,
+  Alert,
   Input,
   Button,
   Typography,
@@ -71,7 +72,11 @@ export default function LoginPage() {
     await new Promise((resolve) => setTimeout(resolve, 400));
     const backendReady = await waitForBackendReady();
     if (!backendReady) {
-      message.error('The platform is still starting. Please try again in a moment.');
+      message.warning({
+        content:
+          'Service notice: the Render server may be waking up after inactivity. Please wait up to 60 seconds, then try signing in again.',
+        duration: 6,
+      });
       setLoading(false);
       return;
     }
@@ -286,6 +291,15 @@ export default function LoginPage() {
                   </Button>
                 </div>
               </div>
+
+              <Alert
+                className="!mt-7 !min-h-[132px] !h-auto !w-full !rounded-2xl !border-[#FDA4AF] !bg-[#FFF1F2] !px-4 !py-4 sm:!min-h-[112px] sm:!px-5 [&_.ant-alert-description]:!text-[11px] [&_.ant-alert-description]:!leading-5 [&_.ant-alert-description]:!text-[#9F1239] [&_.ant-alert-message]:!text-xs [&_.ant-alert-message]:!font-semibold [&_.ant-alert-message]:!text-[#881337]"
+                icon={<ThunderboltOutlined />}
+                message="Service notice"
+                description="StatKarmyog is hosted on Render. After inactivity, the first sign-in may take up to 60 seconds while the service wakes up."
+                showIcon
+                type="warning"
+              />
 
               <div className="mt-7 text-center">
                 <Button

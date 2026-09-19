@@ -228,9 +228,20 @@ async def generate_quiz(
             logger.info("[QUIZ] questions_generated=%d schema_valid=true", len(questions))
         except ValueError as exc:
             logger.warning("MCQ generation failed: %s", exc)
+            if "GOOGLE_API_KEY environment variable is not set" in str(exc):
+                return JSONResponse(
+                    status_code=503,
+                    content={
+                        "code": "LLM_NOT_CONFIGURED",
+                        "error": (
+                            "Quiz generation is not configured on the server. "
+                            "Set GOOGLE_API_KEY in Render and redeploy."
+                        )
+                    },
+                )
             return JSONResponse(
-                status_code=500,
-                content={"error": "LLM request failed or returned an invalid quiz response. Please try again."},
+                status_code=502,
+                content={"error": "The LLM service did not return a valid quiz. Please try again."},
             )
         except Exception as exc:
             logger.exception("Unexpected error during MCQ generation")
