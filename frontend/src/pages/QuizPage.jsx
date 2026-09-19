@@ -12,7 +12,6 @@ import {
   Radio,
   Button,
   Progress,
-  Steps,
   Space,
   Tag,
   Alert,
@@ -30,6 +29,11 @@ import {
   SafetyCertificateOutlined,
   ReloadOutlined,
   HistoryOutlined,
+  CheckCircleFilled,
+  FileTextOutlined,
+  DatabaseOutlined,
+  RobotOutlined,
+  TagsOutlined,
 } from '@ant-design/icons';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
@@ -70,6 +74,34 @@ export default function QuizPage() {
   const [quizHistory, setQuizHistory] = useState([]);
 
   const isMyQuizzesRoute = location.pathname === '/my-quizzes';
+
+  const generationStages = [
+    {
+      title: 'Source ready',
+      detail: fileList.length > 0 ? fileList[0].name : 'Assessment brief prepared',
+      icon: fileList.length > 0 ? <FileTextOutlined /> : <SafetyCertificateOutlined />,
+    },
+    {
+      title: 'Reading material',
+      detail: 'Extracting document text',
+      icon: <FileTextOutlined />,
+    },
+    {
+      title: 'Finding concepts',
+      detail: 'Mapping evidence to competencies',
+      icon: <DatabaseOutlined />,
+    },
+    {
+      title: 'Writing questions',
+      detail: 'LLM is shaping the MCQs',
+      icon: <RobotOutlined />,
+    },
+    {
+      title: 'Final review',
+      detail: 'Checking answers and tags',
+      icon: <TagsOutlined />,
+    },
+  ];
 
   useEffect(() => {
     if (isMyQuizzesRoute) {
@@ -436,27 +468,62 @@ export default function QuizPage() {
 
       {/* Stage 2: GENERATION PROCESS STEPPER */}
       {stage === 'generating' && (
-        <Card bordered={false} className="rounded-2xl border border-[#DCE7F0] bg-white shadow-sm text-center py-12 px-6">
-          <Title level={4} style={{ color: '#0B2641', marginBottom: 24 }}>
-            Generating AI MCQs for &quot;{selectedCompetency}&quot;...
-          </Title>
+        <Card bordered={false} className="quiz-roadmap-card rounded-2xl border border-[#DCE7F0] bg-white px-4 py-8 shadow-sm sm:px-8 sm:py-10">
+          <div className="mx-auto max-w-3xl text-center">
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-[#EAF3FA] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[#2966A3]">
+              <LoadingOutlined /> Live generation pipeline
+            </div>
+            <Title level={4} style={{ color: '#0B2641', marginBottom: 8 }}>
+              Building your {numQuestions}-question assessment
+            </Title>
+            <Paragraph className="!mx-auto !mb-8 !max-w-xl !text-sm !leading-6 !text-[#617487]">
+              The material is moving through the competency engine for <strong>{selectedCompetency}</strong>. Each stage lights up as it is completed.
+            </Paragraph>
 
-          <div className="overflow-x-auto pb-4 mb-6">
-            <Steps
-              current={generationStep}
-              items={[
-                { title: 'Source Material' },
-                { title: 'Text Extraction' },
-                { title: 'Concept ID' },
-                { title: 'LLM Synthesis' },
-                { title: 'Tagging' },
-              ]}
-              style={{ minWidth: 500, maxWidth: 700, margin: '0 auto' }}
-            />
+            <div className="quiz-roadmap" aria-label="Quiz generation progress">
+              <div className="quiz-roadmap-track" aria-hidden="true">
+                <div
+                  className="quiz-roadmap-track-fill"
+                  style={{ width: `${Math.min((generationStep / (generationStages.length - 1)) * 100, 100)}%` }}
+                />
+              </div>
+              <div className="quiz-roadmap-stages">
+                {generationStages.map((stageItem, index) => {
+                  const isComplete = index < generationStep;
+                  const isActive = index === generationStep;
+                  return (
+                    <div
+                      key={stageItem.title}
+                      className={`quiz-roadmap-stage ${isComplete ? 'is-complete' : ''} ${isActive ? 'is-active' : ''}`}
+                    >
+                      <div className="quiz-roadmap-node">
+                        {isComplete ? <CheckCircleFilled /> : stageItem.icon}
+                      </div>
+                      <div className="mt-3 text-xs font-bold text-[#0B2641]">{stageItem.title}</div>
+                      <div className="mt-1 hidden text-[11px] leading-4 text-[#8AA0B2] sm:block">{stageItem.detail}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="quiz-roadmap-status mt-9 flex items-center gap-3 rounded-xl border border-[#DCE7F0] bg-[#F8FBFD] px-4 py-3 text-left">
+              <span className="quiz-roadmap-pulse flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#2966A3] text-white">
+                {generationStages[generationStep]?.icon || <LoadingOutlined />}
+              </span>
+              <div className="min-w-0">
+                <div className="text-xs font-bold uppercase tracking-[0.12em] text-[#2966A3]">
+                  Now processing
+                </div>
+                <div className="truncate text-sm font-medium text-[#172B3D]">
+                  {generationStages[generationStep]?.detail || 'Packaging your assessment'}
+                </div>
+              </div>
+              <div className="ml-auto shrink-0 text-xs font-semibold text-[#617487]">
+                {Math.min(Math.round(((generationStep + 1) / generationStages.length) * 100), 99)}%
+              </div>
+            </div>
           </div>
-
-          <LoadingOutlined style={{ fontSize: 40, color: '#2966A3' }} />
-          <div className="text-sm text-[#465C70] mt-4 font-medium">Extracting key concepts & synthesizing question pool...</div>
         </Card>
       )}
 

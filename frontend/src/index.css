@@ -64,3 +64,113 @@
 .ant-menu-dark .ant-menu-submenu-selected > .ant-menu-submenu-title {
   color: #ffffff !important;
 }
+
+/* Quiz generation roadmap */
+.quiz-roadmap {
+  position: relative;
+  padding: 0 2px;
+}
+
+.quiz-roadmap-track {
+  position: absolute;
+  top: 23px;
+  left: 10%;
+  right: 10%;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e8f0f7;
+}
+
+.quiz-roadmap-track-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #3d7d70, #2966a3);
+  transition: width 700ms ease;
+}
+
+.quiz-roadmap-stages {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.quiz-roadmap-stage {
+  position: relative;
+  min-width: 0;
+  color: #8aa0b2;
+}
+
+.quiz-roadmap-node {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  width: 46px;
+  height: 46px;
+  margin: 0 auto;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #dce7f0;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #8aa0b2;
+  font-size: 18px;
+  transition: color 400ms ease, border-color 400ms ease, background 400ms ease, box-shadow 400ms ease;
+}
+
+.quiz-roadmap-stage.is-complete .quiz-roadmap-node {
+  border-color: #3d7d70;
+  background: #3d7d70;
+  color: #ffffff;
+}
+
+.quiz-roadmap-stage.is-active .quiz-roadmap-node {
+  border-color: #2966a3;
+  color: #2966a3;
+  box-shadow: 0 0 0 7px rgba(41, 102, 163, 0.1);
+  animation: quiz-roadmap-breathe 1.8s ease-in-out infinite;
+}
+
+.quiz-roadmap-status {
+  animation: quiz-roadmap-rise 500ms ease both;
+}
+
+.quiz-roadmap-pulse {
+  animation: quiz-roadmap-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes quiz-roadmap-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+@keyframes quiz-roadmap-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(41, 102, 163, 0.3); }
+  50% { box-shadow: 0 0 0 8px rgba(41, 102, 163, 0); }
+}
+
+@keyframes quiz-roadmap-rise {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 640px) {
+  .quiz-roadmap-track {
+    top: 19px;
+    left: 8%;
+    right: 8%;
+    height: 3px;
+  }
+
+  .quiz-roadmap-node {
+    width: 38px;
+    height: 38px;
+    font-size: 15px;
+  }
+
+  .quiz-roadmap-stage > div:nth-child(2) {
+    font-size: 10px;
+    line-height: 1.25;
+  }
+}
