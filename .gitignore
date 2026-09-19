@@ -19,6 +19,7 @@ env/
 *.sqlite3
 data/app.db
 data/chroma/
+data/profile_photos/
 chroma_db/
 mock_igot/data/mock_igot.db
 

@@ -152,10 +152,10 @@ class TestPassportEndpoint:
     def test_get_passport_no_scores(self, client, test_db_session):
         """Officer with no CompetencyScore rows returns empty competencies array and message."""
         from app.models.models import Officer
-        officer = test_db_session.query(Officer).filter(Officer.officer_id == "OFF006").first()
+        officer = test_db_session.query(Officer).filter(Officer.officer_id == "OFF-NO-SCORES").first()
         if not officer:
             officer = Officer(
-                officer_id="OFF006",
+            officer_id="OFF-NO-SCORES",
                 name="No Score Officer",
                 designation="Statistical Assistant",
                 role_id="R01",
@@ -168,10 +168,10 @@ class TestPassportEndpoint:
             test_db_session.add(officer)
             test_db_session.commit()
 
-        response = client.get("/api/passport/OFF006")
+        response = client.get("/api/passport/OFF-NO-SCORES")
         assert response.status_code == 200
         data = response.json()
-        assert data["officer_id"] == "OFF006"
+        assert data["officer_id"] == "OFF-NO-SCORES"
         assert data["competencies"] == []
         assert "No assessment history yet" in data["message"]
 

@@ -2,8 +2,8 @@
 
 > **Project:** AI-Enabled Skill Intelligence & Learning Platform  
 > **Problem Statement:** SIH PS 26101 (MoSPI / NSSTA)  
-> **Version:** Phase 8 Final Integration Build  
-> **Last Verified:** 2026-09-11  
+> **Version:** Final integration build
+> **Last Verified:** 2026-09-20
 
 ---
 
@@ -24,10 +24,10 @@ Follow this exact command sequence to start the full prototype stack from a fres
 #### 1️⃣ Terminal 1: Core Backend API (Port 8000)
 ```powershell
 # Navigate to repository root
-cd "c:\Users\acer\OneDrive\Apps\sih hackathon prototype"
+cd "c:\Java-Script\Next Js\Projects\StatKarmyog\StatKarmyog"
 
 # Start FastAPI server (Auto-seeds SQLite database & builds ChromaDB vector index)
-uvicorn app.main:app --port 8000 --reload
+.\.venv\Scripts\python.exe -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 *Expected Output:* `INFO: Application startup complete. Uvicorn running on http://127.0.0.1:8000`
 
@@ -35,10 +35,10 @@ uvicorn app.main:app --port 8000 --reload
 
 #### 2️⃣ Terminal 2: Mock-iGOT Integration Service (Port 8001)
 ```powershell
-cd "c:\Users\acer\OneDrive\Apps\sih hackathon prototype"
+cd "c:\Java-Script\Next Js\Projects\StatKarmyog\StatKarmyog"
 
 # Start Mock-iGOT server (Seeds mock enrollments and course catalogue)
-uvicorn mock_igot.app:app --port 8001 --reload
+.\.venv\Scripts\python.exe -m uvicorn mock_igot.app:app --host 0.0.0.0 --port 8001 --reload
 ```
 *Expected Output:* `INFO: Loaded courses into catalogue cache. Uvicorn running on http://127.0.0.1:8001`
 
@@ -56,7 +56,7 @@ celery -A mock_igot.celery_app beat -l info
 
 #### 4️⃣ Terminal 4: React Frontend (Port 5173)
 ```powershell
-cd "c:\Users\acer\OneDrive\Apps\sih hackathon prototype\frontend"
+cd "c:\Java-Script\Next Js\Projects\StatKarmyog\StatKarmyog\frontend"
 
 # Start Vite dev server
 npm run dev
@@ -73,7 +73,7 @@ All 6 walkthrough steps were verified live against running services.
 | :--- | :--- | :--- | :--- | :--- |
 | **a. Officer Login** | Select `OFF001` (Rakesh Kumar) from dropdown | `POST /login` (Local State) | Success | Real Auth Context |
 | **b. Officer Dashboard** | Render Radar Chart, Gap Cards & Recommendations | `GET /api/officers/OFF001/gaps`<br>`GET /api/officers/OFF001/recommendations/semantic` | Success | **Real Backend API** |
-| **c. Quiz Generation** | Upload document / select `Python` & generate MCQs | `POST /api/quiz/generate` | Success | **Real LLM / Fallback** |
+| **c. Quiz Generation** | Upload document / select a competency & generate MCQs | `POST /api/quiz/generate` | Success when `GOOGLE_API_KEY` is configured | **Real Gemini LLM** |
 | **d. Quiz Submission** | Submit answers & receive immediate score | `POST /api/quiz/submit` | Success (Creates `CompetencyScore` row) | **Real Backend API** |
 | **e. Competency Passport** | View trajectory chart & improvement delta | `GET /api/passport/OFF001` | Success (Delta computed, trend chart updated) | **Real Backend API** |
 | **f. Admin Analytics** | Login as `ADM001` -> View org-wide gap & training effectiveness | `GET /api/admin/gap-summary`<br>`GET /api/admin/training-effectiveness` | Success (Reflects officer's score in org aggregate) | **Real Backend API** |

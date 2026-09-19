@@ -363,8 +363,8 @@ export default function Dashboard() {
       </div>
 
       {/* RADAR CHART & DYNAMIC GAP SUMMARY TABLE */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-5 rounded-2xl border border-[#DCE7F0] bg-white p-5 shadow-sm flex flex-col">
+      <div className="grid min-w-0 grid-cols-1 items-start gap-6 lg:grid-cols-12">
+        <div className="flex min-w-0 flex-col rounded-2xl border border-[#DCE7F0] bg-white p-4 shadow-sm sm:p-5 lg:col-span-5">
           <div className="flex items-center gap-2 mb-4">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#D1E0EE] text-[#0B2641]">
               <RiseOutlined />
@@ -375,7 +375,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="h-72 w-full flex-1 flex items-center justify-center">
+          <div className="h-[280px] w-full shrink-0 sm:h-[320px] lg:h-[360px]">
             <ResponsiveContainer width="100%" height="100%">
               <RadarChart data={radarData}>
                 <PolarGrid stroke="#E8F0F7" />
@@ -390,7 +390,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="lg:col-span-7 rounded-2xl border border-[#DCE7F0] bg-white p-5 shadow-sm flex flex-col">
+        <div className="flex min-w-0 flex-col rounded-2xl border border-[#DCE7F0] bg-white p-4 shadow-sm sm:p-5 lg:col-span-7">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#D1E0EE] text-[#0B2641]">
@@ -406,12 +406,14 @@ export default function Dashboard() {
             </Button>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="max-h-[320px] min-h-0 overflow-auto rounded-xl border border-[#F1F6FA] sm:max-h-[360px] lg:max-h-[360px]">
             <Table
               dataSource={gapsData}
               columns={gapColumns}
               pagination={false}
               size="middle"
+              scroll={{ x: 620 }}
+              sticky
               rowKey={(r) => r.skill || r.skill_label || Math.random()}
               onRow={() => ({
                 onClick: () => navigate('/gaps'),
